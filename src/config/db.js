@@ -1,9 +1,18 @@
+/**
+ * Database configuration module.
+ * Sets up the PostgreSQL connection pool and creates initial table/data.
+ */
+
 const { Pool } = require('pg');
 
+// Create a connection pool using the DATABASE_URL environment variable
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+/**
+ * Creates the 'tasks' table if missing and seeds initial sample data.
+ */
 async function initDb() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS tasks (

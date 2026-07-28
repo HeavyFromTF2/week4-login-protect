@@ -1,25 +1,33 @@
+/**
+ * Express application configuration module.
+ * Sets up global middleware, OpenAPI documentation routes, and application endpoints.
+ */
+
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const fs = require('fs');
 const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
+
+// Middleware to parse incoming request bodies as JSON
 app.use(express.json());
 
-// Swagger Docs
+// Load OpenAPI JSON file and mount Swagger UI documentation at /docs
 const swaggerDocument = JSON.parse(fs.readFileSync('./src/docs/openapi.json', 'utf8'));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Base endpoints
+// GET / - Root endpoint returning basic API metadata
 app.get('/', (req, res) => {    
   res.json({ name: "Task API", version: "1.0", endpoints: ["/tasks"] });
 });
 
+// GET /health - Healthcheck endpoint to verify if the server is running
 app.get('/health', (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Task Routes
+// Mount task-related routes under the /tasks prefix
 app.use('/tasks', taskRoutes);
 
 module.exports = app;

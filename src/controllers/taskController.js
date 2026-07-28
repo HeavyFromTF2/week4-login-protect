@@ -1,6 +1,12 @@
+/**
+ * Task Controller.
+ * Handles incoming HTTP requests, validates inputs, and sends HTTP responses.
+ */
+
 const taskRepository = require('../repositories/taskRepository');
 
 const taskController = {
+  // GET /tasks - Fetch all tasks with optional query filters (?search= or ?done=)
   async getAllTasks(req, res) {
     try {
       const tasks = await taskRepository.findAll(req.query);
@@ -10,6 +16,7 @@ const taskController = {
     }
   },
 
+  // GET /tasks/:id - Fetch a single task by its primary key ID
   async getTaskById(req, res) {
     try {
       const task = await taskRepository.findById(req.params.id);
@@ -20,6 +27,7 @@ const taskController = {
     }
   },
 
+  // POST /tasks - Create a new task (requires JSON body with 'title')
   async createTask(req, res) {
     try {
       const { title } = req.body;
@@ -34,6 +42,7 @@ const taskController = {
     }
   },
 
+  // PUT /tasks/:id - Update an existing task's title and status
   async updateTask(req, res) {
     try {
       const { title, done } = req.body;
@@ -54,6 +63,7 @@ const taskController = {
     }
   },
 
+  // DELETE /tasks/:id - Remove a task by ID (returns HTTP 204 No Content)
   async deleteTask(req, res) {
     try {
       const deletedTask = await taskRepository.delete(req.params.id);
