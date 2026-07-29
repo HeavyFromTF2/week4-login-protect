@@ -66,7 +66,24 @@ const authController = {
     } catch (err) {
       return res.status(500).json({ error: 'Internal server error' });
     }
+  },
+
+  // POST /auth/logout
+  async logout(req, res) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      // Return HTTP 204 No Content on successful logout
+      return res.status(204).send();
+    } catch (err) {
+      return res.status(500).json({ error: 'Internal server error' });
+    }
   }
 };
+
 
 module.exports = authController;

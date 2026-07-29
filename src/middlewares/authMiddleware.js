@@ -10,22 +10,26 @@ const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  // Return HTTP 401 Unauthorized if token is missing
+  // Return HTTP 401 if token is missing
   if (!token) {
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  // Validate the JWT token against Supabase Auth SDK
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+  try {
+    // Validate JWT token against Supabase Auth SDK
+    const { data: { user }, error } = await supabase.auth.getUser(token);
 
-  // Return HTTP 403 Forbidden if token validation fails or is expired
-  if (error || !user) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
+    // Return HTTP 401 if token is expired, tampered with, or invalid
+    if (error || !user) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+
+    // Attach user payload to request object for downstream usage
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
-
-  // Attach user context to request object and proceed to controller
-  req.user = user;
-  next();
 };
 
 module.exports = authenticateToken;

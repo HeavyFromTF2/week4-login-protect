@@ -1,36 +1,29 @@
 /**
  * Protected Routes Router.
- * Handles endpoints requiring direct JWT verification via Supabase Auth.
+ * Handles endpoints requiring valid JWT authentication.
  */
 
 const express = require('express');
 const router = express.Router();
-const supabase = require('../config/supabase');
+const authenticateToken = require('../middlewares/authMiddleware');
 
-// GET /protected/profile - Verify token and return user metadata
-router.get('/profile', async (req, res) => {
-  // Extract Authorization header (Expected format: "Bearer <token>")
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+// Apply auth middleware to all routes in this router
+router.use(authenticateToken);
 
-  // Return HTTP 401 if token is missing
-  if (!token) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
-  }
-
-  // Verify token directly with Supabase Auth SDK
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-
-  // Return HTTP 401 if token is expired, tampered with, or invalid
-  if (error || !user) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
-  }
-
-  // Return HTTP 200 with safe user metadata
+// GET /protected/profile - Returns authenticated user metadata
+router.get('/profile', (req, res) => {
   return res.status(200).json({
-    id: user.id,
-    email: user.email,
-    created_at: user.created_at
+    id: req.user.id,
+    email: req.user.email,
+    created_at: req.user.created_at
+  });
+});
+
+// GET /protected/dashboard - Second protected route to demonstrate middleware reusability
+router.get('/dashboard', (req, res) => {
+  return res.status(200).json({
+    message: `Welcome to your protected dashboard, ${req.user.email}!`,
+    user_id: req.user.id
   });
 });
 
