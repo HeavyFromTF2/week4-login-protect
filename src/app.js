@@ -7,6 +7,7 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const fs = require('fs');
 const taskRoutes = require('./routes/taskRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.get('/health', (req, res) => {
 });
 
 // Mount task-related routes under the /tasks prefix
+app.use('/auth', authRoutes)
 app.use('/tasks', taskRoutes);
 
 module.exports = app;
