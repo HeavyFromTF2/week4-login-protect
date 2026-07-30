@@ -1,24 +1,31 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Task API",
+    "title": "Task API with Supabase Auth",
     "version": "1.0.0",
-    "description": "A simple To-Do List API built for FlyRank Week 2 Assignment."
+    "description": "REST API with JWT authentication powered by Supabase Auth"
   },
   "servers": [
     {
       "url": "http://localhost:3000",
-      "description": "Local server"
+      "description": "Local Development Server"
     }
   ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
   "paths": {
     "/": {
       "get": {
         "summary": "Get API basic information",
         "responses": {
-          "200": {
-            "description": "Success"
-          }
+          "200": { "description": "Success" }
         }
       }
     },
@@ -26,15 +33,109 @@
       "get": {
         "summary": "Check if server is alive",
         "responses": {
-          "200": {
-            "description": "Server is healthy"
+          "200": { "description": "Server is healthy" }
+        }
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "summary": "Register a new user account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "test@example.com" },
+                  "password": { "type": "string", "example": "password123" }
+                },
+                "required": ["email", "password"]
+              }
+            }
           }
+        },
+        "responses": {
+          "201": { "description": "User created successfully" },
+          "400": { "description": "Missing email or password" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate user and return JWT access token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "test@example.com" },
+                  "password": { "type": "string", "example": "password123" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authentication successful" },
+          "400": { "description": "Missing credentials" },
+          "401": { "description": "Invalid login credentials" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "End current user session",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": { "description": "Successfully logged out" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/protected/profile": {
+      "get": {
+        "summary": "Fetch authenticated user private profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": { "description": "Profile data returned successfully" },
+          "401": { "description": "Invalid or missing access token" }
+        }
+      }
+    },
+    "/protected/dashboard": {
+      "get": {
+        "summary": "Fetch authenticated user dashboard details",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": { "description": "Dashboard data returned successfully" },
+          "401": { "description": "Invalid or missing access token" }
         }
       }
     },
     "/tasks": {
       "get": {
-        "summary": "List all tasks by done or not done",
+        "summary": "List all tasks by done or not done status",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "done",
@@ -47,13 +148,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "A list of tasks"
-          }
+          "200": { "description": "A list of tasks" },
+          "401": { "description": "Unauthorized" }
         }
       },
       "post": {
         "summary": "Create a new task",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -61,9 +166,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string"
-                  }
+                  "title": { "type": "string" }
                 },
                 "required": ["title"]
               }
@@ -71,47 +174,47 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
+          "201": { "description": "Created" },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/tasks/{id}": {
       "get": {
         "summary": "Get a single task by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer"
-            }
+            "schema": { "type": "integer" }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "404": {
-            "description": "Not Found"
-          }
+          "200": { "description": "Success" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Not Found" }
         }
       },
       "put": {
         "summary": "Update a task",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer"
-            }
+            "schema": { "type": "integer" }
           }
         ],
         "requestBody": {
@@ -121,48 +224,39 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string"
-                  },
-                  "done": {
-                    "type": "boolean"
-                  }
+                  "title": { "type": "string" },
+                  "done": { "type": "boolean" }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
-          }
+          "200": { "description": "Success" },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Not Found" }
         }
       },
       "delete": {
         "summary": "Delete a task",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer"
-            }
+            "schema": { "type": "integer" }
           }
         ],
         "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found"
-          }
+          "204": { "description": "No Content" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Not Found" }
         }
       }
     }

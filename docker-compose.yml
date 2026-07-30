@@ -13,6 +13,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: on-failure # <-- If the bd takes more than a second, the API tries against instead of being killed
+    networks:
+      - app-network
 
   db:
     image: postgres:16-alpine
@@ -26,6 +29,12 @@ services:
       interval: 2s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
 volumes:
   taskdata:
+
+networks:
+  app-network:
+    driver: bridge
