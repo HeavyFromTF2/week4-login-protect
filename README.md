@@ -92,6 +92,22 @@ curl -i http://localhost:3000/protected/profile \
   -H "Authorization: Bearer invalid_or_tampered_token"
 ```
 
+### Proof Images
+
+Supabase.com dashboard health status:
+<img width="1200" height="870" alt="supa functional" src="https://github.com/user-attachments/assets/8024631e-46c4-48f2-9f19-f340e1c29fc5" />
+
+Token being used to autenticate successfully:
+<img width="800" height="600" alt="Bearer1" src="https://github.com/user-attachments/assets/ca7e15e3-420c-47b4-9990-534053c1bfb5" />
+
+Fetch autenticated user private profile:
+<img width="1546" height="903" alt="image" src="https://github.com/user-attachments/assets/e16f87e5-629f-40b3-bdaf-135081a5343f" />
+
+Task being created after being logged in with a JWT:
+<img width="800" height="600" alt="Bearer3" src="https://github.com/user-attachments/assets/8cc8fdc9-addd-4559-bd3e-f5ea8bace3e1" />
+
+
+
 ## Features
 
 - Supabase Auth integration
