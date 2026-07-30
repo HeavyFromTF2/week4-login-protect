@@ -101,38 +101,6 @@ curl -i http://localhost:3000/protected/profile \
 - Bearer token authentication
 - Correct HTTP status codes (`200`, `201`, `204`, `400`, `401`)
 
----
-
-## ⚔️ AI vs Me (Assignment A4)
-
-### Original Prompt Used
-
-> "Integrate Supabase Auth into my existing Express Todo API. Implement Sign Up, Login, Logout, JWT verification middleware, protect authenticated routes, configure Swagger with Bearer authentication, and keep the existing task endpoints protected."
-
-### Analysis & Differences Found
-
-**1. What AI did better:**
-
-- **Supabase SDK integration:** The AI correctly used the official authentication methods (`signUp`, `signInWithPassword`, `signOut`, and `getUser`) instead of manually handling passwords.
-- **JWT verification middleware:** It created a reusable middleware that extracts the Bearer token from the `Authorization` header and validates it before allowing access to protected routes.
-- **Swagger integration:** It configured the HTTP Bearer authentication scheme, allowing authenticated endpoints to be tested directly from Swagger UI.
-
-**2. What AI got wrong or ignored:**
-
-- Some responses initially returned incorrect HTTP status codes.
-- The authentication middleware needed adjustments to correctly reject missing, expired, or tampered JWTs with `401 Unauthorized`.
-- Some authentication error responses required refinement to fully match the assignment specification.
-
-**3. What my prompt forgot to specify:**
-
-- The exact HTTP status codes expected for every endpoint.
-- That Swagger users should paste only the raw JWT (without the `Bearer` prefix).
-- That the project must use only the Supabase public **anon** key and never the `service_role` key.
-
-### Rematch
-
-After refining the prompt with the required status codes, middleware behavior, Swagger configuration, and environment requirements, the regenerated implementation matched the assignment requirements while keeping the authentication flow clean and reusable.
-
 ## AI Usage
 
 AI was used as a learning, code-review, and debugging partner to better understand:
