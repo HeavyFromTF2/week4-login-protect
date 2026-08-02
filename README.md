@@ -107,7 +107,6 @@ Task being created after being logged in with a JWT:
 <img width="800" height="600" alt="Bearer3" src="https://github.com/user-attachments/assets/8cc8fdc9-addd-4559-bd3e-f5ea8bace3e1" />
 
 
-
 ## Features
 
 - Supabase Auth integration
@@ -116,6 +115,39 @@ Task being created after being logged in with a JWT:
 - OpenAPI / Swagger UI integration
 - Bearer token authentication
 - Correct HTTP status codes (`200`, `201`, `204`, `400`, `401`)
+
+
+## ⚔️ AI vs Me (Stage 7 - AI Rematch)
+
+### Original Prompt Used
+
+> "I want you to make a secure api using node js, swagger and express. It should be able to make all crud operations, and it must also have a login system (with login and logout), with JWT tokens, protected routes. Use a postgres BD with the supabase as the BaaS service, and use bearer auth. Send me the whole project ready to be ran. Make it as simple as possible with every feature implemented."
+
+### Analysis & Differences Found
+
+1. **What AI did better:**
+   * **Swagger UI Integration**: The AI automatically generated interactive OpenAPI docs directly from JSDoc annotations in routes, keeping the `/api-docs` endpoint fully testable and polished.
+   * **Input Validation Details**: It  caught client-side payload issues early, returning detailed validation arrays (e.g., enforcing `Password must be at least 8 characters long` with a 400 Bad Request before hitting the DB).
+
+2. **What AI got wrong or ignored (Breaking the requirements & Security Flaws):**
+   * **Critical Security Violation (`service_role` vs `anon`)**: The AI instructed me to use `SUPABASE_SERVICE_ROLE_KEY` in `.env` instead of using the public `anon` key alongside Supabase Auth's native token verification (`supabase.auth.getUser()`), which is a critical flaw.
+   * **Re-inventing the Wheel**: Instead of using Supabase Auth as the Identity Provider (IdP) for account creation, login, and token generation, it built a manual local auth system using `bcrypt` and custom JWT signing with a separate `users` and `revoked_tokens` SQL table.
+   * **RLS Crashes**: When forced to run with the public `anon` key, the AI's endpoint crashed with a `500 Internal Server Error`. As captured in the Supabase Postgres logs (`new row violates row-level security policy for table "users"`), its manual `INSERT` queries broke because no RLS policies were configured for custom user tables.
+
+<img width="1000" height="740" alt="Supabase first prompt" src="https://github.com/user-attachments/assets/dfec2039-7de8-4263-8dbb-b9298c029448" />
+
+
+3. **What my prompt forgot to specify:**
+   * I forgot to specify using **Supabase Auth SDK directly** (`signUp`, `signInWithPassword`, `signOut`), which led the AI to construct its own local authentication scheme.
+   * I didn't enforce using the **public `anon` key**, causing the AI to default to the dangerous `service_role` key thinking it would be something pretty obvious.
+   * I didn't enforce the modular directory structure used so far.
+
+### Rematch
+
+After updating the prompt to explicitly enforce: *"Use Supabase Auth directly for authentication, and use postgres via Supabase as the BaaS service with the public anon key (never use the service_role key)"*, the regenerated code successfully eliminated the custom auth/bcrypt overhead, properly integrated native Supabase Auth methods, securely enforced Row Level Security (RLS), and resolved all previous 500 server crashes (now correctly forwarding native Supabase Auth responses like `email rate limit exceeded` via 400 Bad Request).
+
+<img width="1000" height="740" alt="email rate limit (2) exceeded" src="https://github.com/user-attachments/assets/d8ef0fac-cac8-463f-9623-8888c947324b" />
+
 
 ## AI Usage
 
